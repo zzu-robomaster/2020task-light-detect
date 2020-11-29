@@ -119,12 +119,40 @@ void detect(Mat frame0){
         vector<Point> area0;
         area0 = area_v[i0];
         recogrect = fitEllipse(area0);
-        Point2f* vertices = new cv::Point2f[4];
-        recogrect.points(vertices);
-        for (size_t i = 0; i < 4; i++)
-        {
-            cv::line(frame0, vertices[i], vertices[(i + 1) % 4], cv::Scalar(0, 255, 0), 4, 8, 0);
+
+
+        float recw, rech;
+        if (recogrect.size.width > recogrect.size.height) {
+            recw = recogrect.size.width;
+            rech = recogrect.size.height;
         }
+        else {
+            rech = recogrect.size.width;
+            recw = recogrect.size.height;
+        }
+        float recx = recogrect.center.x - recw / 3;
+        float recy = recogrect.center.y - rech / 3;
+        if (recw < 1 || rech < 1 || recx < 1 || recy < 1
+            || recw + recx > frame0.cols || rech + recy > frame0.rows) {
+            cout << "rect out of range" << endl;
+        }
+        else {
+            Mat roi = frame0(Range(recy, recy + rech), Range(recx, recx + recw));
+            int average_intensity = static_cast<int>(mean(roi).val[0]);//<50
+
+            if (recw < 4.0f * rech && rech < 1.2f * recw) {
+                if (average_intensity < 50) {
+                    Point2f* vertices = new cv::Point2f[4];
+                    recogrect.points(vertices);
+                    for (size_t i = 0; i < 4; i++)
+                    {
+                        cv::line(frame0, vertices[i], vertices[(i + 1) % 4], cv::Scalar(0, 255, 0), 4, 8, 0);
+                    }
+                }
+            }
+        }
+        
+        
         area0.clear();
     }
     area_v.clear();
@@ -163,7 +191,7 @@ int main() {
         }
         
         finish = clock();
-        double time = (double)(finish - start) / CLOCKS_PER_SEC;
+        double time = static_cast<double>(finish - start) / CLOCKS_PER_SEC;
         cout << time << endl;
 
         imshow("frame1", frame1);
