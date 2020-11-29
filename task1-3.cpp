@@ -9,6 +9,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include "task1-3.h"
+//#include "pre.h"
 using namespace std;
 using namespace cv;
 
@@ -18,6 +19,16 @@ Mat hsv, mask, check1, mask2;
 
 ArmorParam param;
 int color_ = param.color;
+
+
+
+#define thresh_1 125//pre_2
+#define thresh_2 40 
+#define blue 1
+#define red 0
+#define team red
+Mat elment_1;
+
 
 void pre(Mat src) {
     //Mat m0, m;
@@ -34,14 +45,40 @@ void pre(Mat src) {
     }
 
     //src.copyTo(mask);
-    threshold(srcb, hsv, 110, 255, THRESH_BINARY);
+    threshold(srcb, hsv, 125, 255, THRESH_BINARY);
     Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
     Mat element2 = getStructuringElement(MORPH_RECT, Size(3, 3));
     //morphologyEx(hsv, mask2, MORPH_CLOSE, element);
     dilate(hsv, mask2, element);
-    erode(mask2, mask2, element2);//形态学处理 不直接open是为了调不同卷积核
+    //erode(mask2, mask2, element2);//形态学处理 不直接open是为了调不同卷积核
     //hsv.copyTo(mask2);
     imshow("m0", mask2);
+}
+
+void pre_2(Mat _src)
+{
+    vector<Mat> bgr;
+    Mat _binary, dst;
+    elment_1 = getStructuringElement(MORPH_RECT, Size(5, 5));
+    split(_src, bgr);
+    cvtColor(_src, _binary, COLOR_RGB2GRAY);
+    threshold(_binary, _binary, thresh_1, 255, THRESH_BINARY);
+    //imshow("_binary", _binary);
+    Mat result_image;
+    if (team == 1)
+    {
+        subtract(bgr[2], bgr[1], result_image);
+    }
+    else
+    {
+        subtract(bgr[0], bgr[2], result_image);
+    }
+    threshold(result_image, result_image, thresh_2, 255, THRESH_BINARY);
+    dilate(result_image, result_image, elment_1);
+    //imshow("result_image", result_image);
+    dst = _binary & result_image;
+    dilate(dst, mask2, elment_1);
+    imshow("dst", dst);
 }
 
 int check() {
@@ -67,23 +104,27 @@ int check() {
     Point2f cen1, cen2;
     int con1 = 0, con2 = 0/*,num = 0*/;
     vector<Point> v1,v2,cont_area;
-    for (int i = 0; i < hier.size(); ++i) {//每对矩形对长宽比和周长 角度差和中心点距离判定
+    for (int i = 0; i < hier.size(); ++i) {//每对led对长宽比和周长 角度差和中心点距离判定
         //if ((2<size[i].width && size[i].width< 50) || (2<size[i].height && size[i].height < 50)) {//降低要求！orz
         //if (15<=2*(size[i].width + size[i].height)<=4000) {//周长判定
-        if ((1 < size[i].width / size[i].height && size[i].width / size[i].height < 7) || (0.14 < size[i].width / size[i].height && size[i].width / size[i].height < 1) || 15 <= 2 * (size[i].width + size[i].height) <= 4000) {
-            //cout << "2" << endl;
+        if ((1.1 < size[i].width / size[i].height && size[i].width / size[i].height < 1.4) || (0.3 < size[i].width / size[i].height && size[i].width / size[i].height < 0.4) || 30 <= 2 * (size[i].width + size[i].height) <= 91) {
+        //if (1) {//(0.2 < size[i].width / size[i].height< 0.7) && 15 <= 2 * (size[i].width + size[i].height) <= 400
+            //float ledratio = size[i].width / size[i].height;
+            //float ledc = 2*(size[i].width + size[i].height);
+            //cout <<"led-wh-ratio:"<< ledratio << endl;
+            //cout <<"peri:"<< ledc << endl;
             for (int j = 0; j < hier.size(); ++j) {
                 ang1 = ang[i];
                 ang2 = ang[j];
                 cen1 = center[i];
                 cen2 = center[j];
-                if (abs(ang1 - ang2) <= 15 && abs(cen1.x - cen2.x) >= 5) { 
+                if (abs(ang1 - ang2) <= 15 && abs(cen1.x - cen2.x) >= 5 && 0.7f<size[i].height / size[j].height && size[i].height / size[j].height<1.3f) {
                     con1 = i; con2 = j; 
                     v1 = cont[con1];
                     v2 = cont[con2];
                     cont_area = v1;
                     cont_area.insert(cont_area.end(), v2.begin(), v2.end());
-                    area_v.push_back(cont_area);//求点集的旋转矩形--------BUG------------1128
+                    area_v.push_back(cont_area);//求点集的旋转矩形
                     v1.clear();
                     v2.clear();
                     cont_area.clear();
@@ -111,14 +152,14 @@ int check() {
     return flag;
 }
 
-//1127 TODO---------装甲板筛选函数
+//1129 TODO---------装甲板筛选函数优化 添加与灯条比较条件
 void detect(Mat frame0){
     RotatedRect recogrect;
 
     for (size_t i0 = 0; i0 < area_v.size(); i0++) {
         vector<Point> area0;
         area0 = area_v[i0];
-        recogrect = fitEllipse(area0);
+        recogrect = minAreaRect(area0);
 
 
         float recw, rech;
@@ -139,8 +180,14 @@ void detect(Mat frame0){
         else {
             Mat roi = frame0(Range(recy, recy + rech), Range(recx, recx + recw));
             int average_intensity = static_cast<int>(mean(roi).val[0]);//<50
+            cout << "inten:" << average_intensity << endl;
+            //if (recw < 4.0f * rech && recw > 1.2f * rech && 2 * (recw + rech) < 400) {
+            if (/*average_intensity<20 &&*/ recw < 2.5f * rech && recw > 2.2f * rech && 2 * (recw + rech) < 400) {//1129------亮度筛选未实现
 
-            if (recw < 4.0f * rech && rech < 1.2f * recw) {
+                float ratio = recw / rech;
+                float peri = 2 * (recw + rech);
+                cout <<"ratio:"<< ratio << endl;
+                cout <<"peri:"<< peri << endl;
                 if (average_intensity < 50) {
                     Point2f* vertices = new cv::Point2f[4];
                     recogrect.points(vertices);
@@ -173,7 +220,8 @@ int main() {
     VideoCapture cap;
     RotatedRect rec;
     cap.set(CAP_PROP_CONVERT_RGB, true);
-    cap.open("2-2.avi");
+    //cap.open("2-2.avi");
+    cap.open(1);
     if (!cap.isOpened()) {
         cerr << "unable open cam" << endl;
         return -1;
@@ -184,7 +232,7 @@ int main() {
         if (frame1.empty()) {
             break;
         }
-        pre(frame1);
+        pre_2(frame1);
         if (check() > 0) {
             detect(frame1);
             
@@ -192,7 +240,7 @@ int main() {
         
         finish = clock();
         double time = static_cast<double>(finish - start) / CLOCKS_PER_SEC;
-        cout << time << endl;
+        //cout << time << endl;
 
         imshow("frame1", frame1);
         //imshow("mask", mask2);
