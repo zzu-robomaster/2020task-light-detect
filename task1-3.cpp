@@ -178,17 +178,18 @@ void detect(Mat frame0){
             cout << "rect out of range" << endl;
         }
         else {
-            Mat roi = frame0(Range(recy, recy + rech), Range(recx, recx + recw));
+            Mat roi = mask2(Range(recy, recy + rech*0.6f), Range(recx, recx + recw*0.6f));//存储形式？
+            //imshow("roi", roi);
             int average_intensity = static_cast<int>(mean(roi).val[0]);//<50
-            cout << "inten:" << average_intensity << endl;
+            //cout << "inten:" << average_intensity << endl;
             //if (recw < 4.0f * rech && recw > 1.2f * rech && 2 * (recw + rech) < 400) {
-            if (/*average_intensity<20 &&*/ recw < 2.5f * rech && recw > 2.2f * rech && 2 * (recw + rech) < 400) {//1129------亮度筛选未实现
+            if (recw < 3.0f * rech && recw > 2.2f * rech && 2 * (recw + rech) < 200) {//1129------亮度筛选未实现
 
                 float ratio = recw / rech;
                 float peri = 2 * (recw + rech);
                 cout <<"ratio:"<< ratio << endl;
                 cout <<"peri:"<< peri << endl;
-                if (average_intensity < 50) {
+                if (average_intensity < 10) {
                     Point2f* vertices = new cv::Point2f[4];
                     recogrect.points(vertices);
                     for (size_t i = 0; i < 4; i++)
