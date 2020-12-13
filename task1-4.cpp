@@ -18,7 +18,7 @@ vector<vector<float> > led_v_h;
 //const int maxn = 100 + 5;
 //float led_v_h[maxn][maxn];
 vector<vector<Point> > area_v;
-int armor_index = 0;
+//int armor_index = 0;
 //vector<vector<int> > armor_led_link;
 Mat hsv, mask, check1, mask2;
 
@@ -103,7 +103,7 @@ int check() {
     vector<Point> v1,v2,cont_area;
     
     for (int i = 0; i < hier.size(); ++i) {//每对led对长宽比和周长 角度差和中心点距离判定
-        armor_index = 0;
+        //armor_index = 0;
         //if ((2<size[i].width && size[i].width< 50) || (2<size[i].height && size[i].height < 50)) {//降低要求！orz
         //if (15<=2*(size[i].width + size[i].height)<=4000) {//周长判定
 
@@ -163,7 +163,8 @@ int check() {
                             cont_area.clear();
                             led_h.clear();
                             //cout << "初次匹配通过 ";
-                            armor_index++;
+                            //armor_index++;
+                            //cout << "armor_index" << armor_index << endl;
                         }
                     }
                 }
@@ -194,7 +195,7 @@ void detect(Mat frame0){
     vector<float> armor_pri;
     vector<vector<int>> armor_num;
 
-    for (size_t i0 = 0; i0 <= armor_index; i0++) {
+    for (size_t i0 = 0; i0 < area_v.size(); i0++) {
         RotatedRect recogrect;
         vector<Point> area0;
         area0 = area_v[i0];
@@ -236,14 +237,16 @@ void detect(Mat frame0){
                         if (average_intensity*(recw+rech)/mid_intensity < mid_intensity) {
                             //cout << "符合中间亮度" << endl;
 
-                            float delta1 = abs(rech - led_v_h[i0][0]);
-                            float delta2 = abs(rech - led_v_h[i0][1]);
+                            float delta1 = sqrt(recogrect.size.area())/ abs(rech - led_v_h[i0][0]);
+                            float delta2 = sqrt(recogrect.size.area()) / abs(rech - led_v_h[i0][1]);
                             //cout << "delta:" <<delta<< endl;
-                            if (delta1 > armor_led_delta_h_min && delta2 > armor_led_delta_h_min && delta1<armor_led_delta_h_max && delta2 < armor_led_delta_h_max) {
-                                cout <<"index:"<<i0<< " delta:" << delta1 <<" "<<delta2<< endl;//装甲板与灯条的宽差在一定范围内
+                            if (0||delta1 > armor_led_delta_h_min && delta2 > armor_led_delta_h_min && delta1<armor_led_delta_h_max && delta2 < armor_led_delta_h_max) {
+                                //cout <<"index:"<<i0<< " delta:" << delta1 <<" "<<delta2<< endl;//装甲板与灯条的宽差在一定范围内
                                 //cout << "the difference between led_h & armor_h is acceptable" << endl;
+                                //cout << delta1 << " " << delta2 << endl;
                                 armor_v.push_back(recogrect);
                                 armor_pri.push_back(ratio * peri);
+                                //cout << "ratio * peri: " << ratio * peri << endl;
                                 
                             }
                             
@@ -261,11 +264,12 @@ void detect(Mat frame0){
     int ind_max = -1;
     for (int i1 = 0; i1 < armor_v.size(); ++i1) {
         if (armor_pri[i1] > max)max = armor_pri[i1]; ind_max = i1;
-        Point2f* vertices = new cv::Point2f[4];
-        armor_v[i1].points(vertices);
+        Point2f* vertices0 = new cv::Point2f[4];
+        armor_v[i1].points(vertices0);
         for (size_t i = 0; i < 4; i++)
         {
-            cv::line(frame0, vertices[i], vertices[(i + 1) % 4], cv::Scalar(0, 255, 0), 1, 8, 0);
+            cv::line(frame0, vertices0[i], vertices0[(i + 1) % 4], cv::Scalar(0, 255, 0), 2, 8, 0);
+            //cout << "ind_max" << ind_max << endl;
         }
     }
     if (ind_max >= 0) {
@@ -281,6 +285,7 @@ void detect(Mat frame0){
     ind_max = -1;
     area_v.clear();
     led_v_h.clear();
+    //armor_index = 0;
 }
 
 //void draw(RotatedRect rec,Mat frame) {
@@ -298,8 +303,8 @@ void detect(Mat frame0){
     VideoCapture cap;
     RotatedRect rec;
     cap.set(CAP_PROP_CONVERT_RGB, true);
-    cap.open("test1206.mp4");
-    //cap.open(0);
+    //cap.open("test1206.mp4");K
+    cap.open(1);
     if (!cap.isOpened()) {
         cerr << "unable open cam" << endl;
         return -1;
@@ -319,7 +324,7 @@ void detect(Mat frame0){
         finish = clock();
         double time = static_cast<double>(finish - start) / CLOCKS_PER_SEC;
         /*cout <<"time"<< time << endl;*/
-        //cout << 1 / time << endl;
+        //cout <<"frame: "<< 1 / time << endl;
         cv::imshow("frame1", frame1);
         //imshow("mask", mask2);
         char c = (char)waitKey(1);//1115
