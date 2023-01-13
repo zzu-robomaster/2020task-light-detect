@@ -8,7 +8,7 @@
 #include <opencv2/video/tracking.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "task1-3.h"
+#include "task1-3-0.h"
 //#include "pre.h"
 using namespace std;
 using namespace cv;
@@ -38,7 +38,7 @@ void pre(Mat src) {
     channels.at(0).copyTo(srcb);
     channels.at(2).copyTo(srcr);
     if (color_ == 0) {
-        subtract(srcb, srcr, srcb);//Í¨µÀÏà¼õ
+        subtract(srcb, srcr, srcb);//Í¨ï¿½ï¿½ï¿½ï¿½ï¿½
     }
     else {
         subtract(srcr, srcb, srcb);
@@ -50,7 +50,7 @@ void pre(Mat src) {
     Mat element2 = getStructuringElement(MORPH_RECT, Size(3, 3));
     //morphologyEx(hsv, mask2, MORPH_CLOSE, element);
     dilate(hsv, mask2, element);
-    //erode(mask2, mask2, element2);//ÐÎÌ¬Ñ§´¦Àí ²»Ö±½ÓopenÊÇÎªÁËµ÷²»Í¬¾í»ýºË
+    //erode(mask2, mask2, element2);//ï¿½ï¿½Ì¬Ñ§ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ö±ï¿½ï¿½openï¿½ï¿½Îªï¿½Ëµï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     //hsv.copyTo(mask2);
     imshow("m0", mask2);
 }
@@ -89,9 +89,9 @@ int check() {
     vector<float> ang;
     vector<Point2f> center;
     vector<Size2f> size;
-    findContours(mask2, cont, hier, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(0, 0));//ÌáÈ¡×îÍâ²ãÂÖÀª
+    findContours(mask2, cont, hier, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(0, 0));//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     for (int i = 0; i < hier.size(); ++i) {
-        RotatedRect rec = minAreaRect(cont[i]);//¶ÔÃ¿¸öÂÖÀªÇóÐý×ª¾ØÐÎ ÌáÈ¡½Ç¶È ÖÐÐÄµãºÍ´óÐ¡
+        RotatedRect rec = minAreaRect(cont[i]);//ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¡ï¿½Ç¶ï¿½ ï¿½ï¿½ï¿½Äµï¿½Í´ï¿½Ð¡
         ang.push_back(float());
         center.push_back(Point2f());
         size.push_back(Size2f());
@@ -104,9 +104,9 @@ int check() {
     Point2f cen1, cen2;
     int con1 = 0, con2 = 0/*,num = 0*/;
     vector<Point> v1,v2,cont_area;
-    for (int i = 0; i < hier.size(); ++i) {//Ã¿¶Ôled¶Ô³¤¿í±ÈºÍÖÜ³¤ ½Ç¶È²îºÍÖÐÐÄµã¾àÀëÅÐ¶¨
-        //if ((2<size[i].width && size[i].width< 50) || (2<size[i].height && size[i].height < 50)) {//½µµÍÒªÇó£¡orz
-        //if (15<=2*(size[i].width + size[i].height)<=4000) {//ÖÜ³¤ÅÐ¶¨
+    for (int i = 0; i < hier.size(); ++i) {//Ã¿ï¿½ï¿½ledï¿½Ô³ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½Ü³ï¿½ ï¿½Ç¶È²ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
+        //if ((2<size[i].width && size[i].width< 50) || (2<size[i].height && size[i].height < 50)) {//ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½orz
+        //if (15<=2*(size[i].width + size[i].height)<=4000) {//ï¿½Ü³ï¿½ï¿½Ð¶ï¿½
         if ((1.1 < size[i].width / size[i].height && size[i].width / size[i].height < 1.4) || (0.3 < size[i].width / size[i].height && size[i].width / size[i].height < 0.4) || 30 <= 2 * (size[i].width + size[i].height) <= 91) {
         //if (1) {//(0.2 < size[i].width / size[i].height< 0.7) && 15 <= 2 * (size[i].width + size[i].height) <= 400
             //float ledratio = size[i].width / size[i].height;
@@ -124,7 +124,7 @@ int check() {
                     v2 = cont[con2];
                     cont_area = v1;
                     cont_area.insert(cont_area.end(), v2.begin(), v2.end());
-                    area_v.push_back(cont_area);//Çóµã¼¯µÄÐý×ª¾ØÐÎ
+                    area_v.push_back(cont_area);//ï¿½ï¿½ã¼¯ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½
                     v1.clear();
                     v2.clear();
                     cont_area.clear();
@@ -141,7 +141,7 @@ int check() {
     size.clear();
 
     //dst = Mat::zeros(mask2.size(), mask2.type());
-    //drawContours(dst, cont, con1, 255);//»­³öÁ½¸ö¾ØÐÎµÄµã¼¯ ÓÃÒ»¸ö´óÐý×ª¾ØÐÎ¿ò×¡
+    //drawContours(dst, cont, con1, 255);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎµÄµã¼¯ ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Î¿ï¿½×¡
     //drawContours(dst, cont, con2, 255);
 
     if (con1 == 0 && con2 == 0) {
@@ -152,7 +152,7 @@ int check() {
     return flag;
 }
 
-//1129 TODO---------×°¼×°åÉ¸Ñ¡º¯ÊýÓÅ»¯ Ìí¼ÓÓëµÆÌõ±È½ÏÌõ¼þ
+//1129 TODO---------×°ï¿½×°ï¿½É¸Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Å»ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È½ï¿½ï¿½ï¿½ï¿½ï¿½
 void detect(Mat frame0){
     RotatedRect recogrect;
 
@@ -178,12 +178,12 @@ void detect(Mat frame0){
             cout << "rect out of range" << endl;
         }
         else {
-            Mat roi = mask2(Range(recy, recy + rech*0.6f), Range(recx, recx + recw*0.6f));//´æ´¢ÐÎÊ½£¿
+            Mat roi = mask2(Range(recy, recy + rech*0.6f), Range(recx, recx + recw*0.6f));//ï¿½æ´¢ï¿½ï¿½Ê½ï¿½ï¿½
             //imshow("roi", roi);
             int average_intensity = static_cast<int>(mean(roi).val[0]);//<50
             //cout << "inten:" << average_intensity << endl;
             //if (recw < 4.0f * rech && recw > 1.2f * rech && 2 * (recw + rech) < 400) {
-            if (recw < 3.0f * rech && recw > 2.2f * rech && 2 * (recw + rech) < 200) {//1129------ÁÁ¶ÈÉ¸Ñ¡Î´ÊµÏÖ
+            if (recw < 3.0f * rech && recw > 2.2f * rech && 2 * (recw + rech) < 200) {//1129------ï¿½ï¿½ï¿½ï¿½É¸Ñ¡Î´Êµï¿½ï¿½
 
                 float ratio = recw / rech;
                 float peri = 2 * (recw + rech);
