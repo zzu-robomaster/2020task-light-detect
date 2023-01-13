@@ -1,3 +1,6 @@
+---
+title: Computer vision based detect program
+---
 While extracting **the areas of interest** from an image, the parameters and techniques used for the constraints affected the **image recognition accuracy**. 
 
 To solve this problem, my teammates and I have proposed several solutions. The first was to **add the judgment of different environmental conditions** directly. Yet too much if-elses, or other judgemental statement impacting the recognition efficiency. Second, the **camera was adjusted in its control parameters** so that it automatically adapted to changes in environmental lighting. However, this method involved hardware programming and should take time to contact the supplier of the camera. 
